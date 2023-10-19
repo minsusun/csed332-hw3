@@ -132,7 +132,7 @@ public class Cell extends Subject {
         //TODO: implement this
         if (this.containsPossibility(number)) {
             this.possibility.remove(number);
-            if (this.hasNoPossibility()) {
+            if (this.hasNoPossibility() && this.number == null) {
                 this.notifyObservers(new ActivationEvent(false));
             }
         }
