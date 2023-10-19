@@ -2,7 +2,7 @@ package edu.postech.csed332.homework3;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A cell that has a number and a set of possibilities. A cell may have a number of observers,
@@ -10,6 +10,9 @@ import java.util.Optional;
  */
 public class Cell extends Subject {
     //TODO: add private members variables and private methods as needed
+    Integer number = null;
+    Set<Integer> possibility = new HashSet<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+    Set<Group> groups = new HashSet<>();
 
     /**
      * Creates an empty cell with a given type. Initially, no number is assigned.
@@ -26,7 +29,7 @@ public class Cell extends Subject {
     @NotNull
     public Optional<Integer> getNumber() {
         //TODO: implement this
-        return Optional.empty();
+        return Optional.ofNullable(this.number);
     }
 
     /**
@@ -38,7 +41,14 @@ public class Cell extends Subject {
      */
     public boolean setNumber(int number) {
         //TODO: implement this
-        return false;
+        if (this.number == null && this.containsPossibility(number)) {
+            this.number = number;
+            this.notifyObservers(new NumberEvent(number, true));
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -49,7 +59,15 @@ public class Cell extends Subject {
      */
     public boolean unsetNumber() {
         //TODO: implement this
-        return false;
+        if (this.number == null) {
+            return false;
+        }
+        else {
+            int number = this.number;
+            this.number = null;
+            this.notifyObservers(new NumberEvent(number, false));
+            return true;
+        }
     }
 
     /**
@@ -61,6 +79,7 @@ public class Cell extends Subject {
         addObserver(group);
 
         //TODO: implement this
+        this.groups.add(group);
     }
 
     /**
@@ -71,7 +90,7 @@ public class Cell extends Subject {
      */
     public boolean containsPossibility(int n) {
         //TODO: implement this
-        return false;
+        return this.possibility.contains(n);
     }
 
     /**
@@ -81,7 +100,7 @@ public class Cell extends Subject {
      */
     public boolean hasNoPossibility() {
         //TODO: implement this
-        return false;
+        return this.possibility.isEmpty();
     }
 
     /**
@@ -93,6 +112,14 @@ public class Cell extends Subject {
      */
     public void addPossibility(int number) {
         //TODO: implement this
+        if (!this.containsPossibility(number)) {
+            if (this.groups.stream().map(group -> group.isAvailable(number)).toList().stream().allMatch(b -> b)) {
+                this.possibility.add(number);
+                if (this.possibility.size() == 1) {
+                    notifyObservers(new ActivationEvent(true));
+                }
+            }
+        }
     }
 
     /*
@@ -103,5 +130,11 @@ public class Cell extends Subject {
      */
     public void removePossibility(int number) {
         //TODO: implement this
+        if (this.containsPossibility(number)) {
+            this.possibility.remove(number);
+            if (this.hasNoPossibility()) {
+                this.notifyObservers(new ActivationEvent(false));
+            }
+        }
     }
 }
